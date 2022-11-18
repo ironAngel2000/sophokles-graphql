@@ -1,133 +1,98 @@
-# sophokles-framework
+# sophokles-graphql extension for sophokles/framework
 
 ## Getting Started
 
 ### About
 
+Based on <a href="https://packagist.org/packages/webonyx/graphql-php" target="_blank">webonyx/graphql-php</a>
 
 ### Installation
 
-Use Sophokles Framework by Composer 
+Use Sophokles graphql extension by Composer
 
 ```bash
-composer require sophokles/framework
+composer sophokles/graphql
 ```
 or
 ```json
 {
     "require": {
-        "sophokles/framework": "1.*",
+        "sophokles/graphql": "1.*",
     }
 }
 ```
 in your composer.json
 
-The Framework needs follow strukture
-```dir
-/
-  local
-    traits
-   system
-     config
-     traits 
-``` 
-with the follow call in your Browser this directories and files will be created
-```url
-[yourdomain]/vendor/sophokles/framework/setup/setup.php
-```
-## Models
-### Create database models
+## Setup
+
+1. creat a new local controller eg. `\local\controller\GraphQlcontroller` and implement the trait `GraphQlHeaderTrait`
+
 ```php
-/**
-* @property typeInt $id,
-* @property typeInt $refField,
-* @property typeInt $order,
-* @property typeText $name,
-* @property typeFloat $amount,
-* @property typeText $description,
-* @property typeText $created,
-* @property typeInt $updated,
-*/
-class MyModel extends dataset
+class GraphQlController extends abstractControllerBase
 {
-    
-    protected $table = 'table_name';
+    use GraphQlHeaderTrait;
 
-    protected function defineTableScheme()
+    protected function init()
     {
-        $schema  = & $this->objTableScheme;
-        $schema->addColumn('id', FieldType::INT)
-            ->length(11)
-            ->autoincrement() // for Autoincrement use onlie INT or BIGINT
-            ->primary();
-            
-        $schema->addColumn('refField', FieldType::INT)
-            ->length(11);
-            
-        $schema->addColumn('order', FieldType::INT)
-            ->length(11);
-            
-        $schema->addColumn('name', FieldType::VARCHAR)
-            ->length(64)
-            ->index();
-            
-        $schema->addColumn('amount', FieldType::DECIMAL)
-            ->length(8, 2);
-            
-        $schema->addColumn('description', FieldType::TEXT)
-            ->length(64);
-            
-        $schema->addColumn('created', FieldType::DATETIME)
-             ->defaultValue('now()');
-        
-        $schema->addColumn('updated', FieldType::TIMESTAMP)
-             ->defaultValue('now()');
-
-        $schema->addKey(['refField', 'order'], false);
-
+        // TODO: Implement init() method.
     }
 
-    protected function defineSorting()
+}
+```
+
+2. route a path to the graphql controller in the systemController trait
+
+```php
+trait systemController
+{
+    protected function traitInit()
     {
-        $this->objSorting->setSortColumn('order');
-        $this->objSorting->addReferenceColumn('refField');
-        $this->objSorting->setListFunction('listForOrderFunction');
+        ...
+        controller::registerRoutePath('graphql',GraphQlController::class);
+        ...
     }
 
-    protected function initClass()
-    {
-        // TODO: Implement initClass() method.
-    }
+}
+```
 
-    public function listForOrderFunction(int $refValue)
+3. define a schema for your graphql api
+
+```php
+class MySchema extends GraphQLSchema
+{
+
+    public function toConfig(): array
     {
-        return $this->getEntriesbyParam(['refField' => $refValue], ['order' => 'ASC']);
+        return [
+            GraphQLSchema::TYPE_QUERIES => [
+                MyQueryClass::class
+            ],
+            GraphQLSchema::TYPE_MUTATIONS => [
+                MyMutation::class,
+            ],
+        ];
     }
 }
 ```
-### Create table in Database
-(Tested on mySQL 8)
-```php
-(new MyModel())->tableSchemeUpdate();
-```
 
-### handle diferent MySql - Databases
-```php
-namespace System\Config;
+4. connect the schema with the graphql controller by adding a new configuration `System\Config\sysconfig.php`
 
-class db2 extends \Sophokles\Database\dbconfig
+```php
+final class sysconfig
 {
-    public function __construct()
+    public static function graphql()
     {
-        $this->setHost('host');
-        $this->setDatabase('database');
-        $this->setUser('user');
-        $this->setPassword('password');
-        $this->setPort(3306);
+        return [
+           'schemas' => [
+               MySchema::class
+             ],
+            'headers' => [
+               // here you can define header keys for the api eg 'Authorisation' or 'Language'
+            ]
+        ];
     }
 }
 ```
-```php
-$myObj = new MyModel(2);
-```
-###
+
+## Types
+
