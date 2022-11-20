@@ -6,6 +6,7 @@ use GraphQL\Server\StandardServer;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Schema;
 use GraphQL\Type\SchemaConfig;
+use Sophokles\Graphql\Types\Types;
 
 abstract class QueryObjectClass
 {
@@ -27,9 +28,7 @@ abstract class QueryObjectClass
             user_error('Authorization failed', E_USER_ERROR);
             die();
         }
-
-
-
+        
         $config = [
             'name' => $this->name,
             'fields' => [

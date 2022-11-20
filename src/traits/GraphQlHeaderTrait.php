@@ -3,8 +3,8 @@
 namespace Sophokles\Graphql\Traits;
 
 use GraphQL\Server\Helper;
-use local\graphql\system\GraphQLSchema;
-use local\graphql\system\QueryObjectClass;
+use Sophokles\Graphql\System\GraphQLSchema;
+use Sophokles\Graphql\System\QueryObjectClass;
 use System\Config\sysconfig;
 
 trait GraphQlHeaderTrait
@@ -38,7 +38,6 @@ trait GraphQlHeaderTrait
     {
 
         $config = sysconfig::graphql();
-
 
         foreach ($config['headers'] as $headerKey) {
             $this->headers[$headerKey] = $this->getHeader($headerKey);

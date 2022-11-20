@@ -1,7 +1,8 @@
 <?php
 
-namespace Sophokles\Graphql\Traits;
+namespace Sophokles\Graphql\Types;
 
+use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Sophokles\Dataset\dataset;
 use Sophokles\Dataset\typeBoolean;
@@ -10,14 +11,27 @@ use Sophokles\Dataset\typeInt;
 use Sophokles\Dataset\typeJson;
 use Sophokles\Dataset\typeText;
 
-trait ModelTypeTrait
+abstract class ModelType extends ObjectType
 {
 
-    protected function resolveModel(dataset $model): array
+    public function __construct(public $name, protected dataset $model, public $description = '')
+    {
+        $fields = $this->resolveModel();
+
+        $config = [
+            'name' => $this->name,
+            'description' => $this->description,
+            'fields' => $fields,
+        ];
+
+        parent::__construct($config);
+    }
+
+    protected function resolveModel(): array
     {
         $fields = [];
 
-        foreach ($model as $item => $type) {
+        foreach ($this->model as $item => $type) {
             if ($type instanceof typeBoolean) {
                 $fields[$item] = [
                     'type' => Type::boolean(),
@@ -41,11 +55,11 @@ trait ModelTypeTrait
             if ($type instanceof typeJson) {
                 $fields[$item] = [
                     'type' => Type::string(),
-                    'resolve' => static fn(typeJson $item): string => $item->getJsonString()
                 ];
             }
         }
 
         return $fields;
     }
+
 }

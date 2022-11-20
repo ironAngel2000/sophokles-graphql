@@ -17,6 +17,7 @@
   },
   "autoload": {
     "psr-4": {
+      "Sophokles\\Graphql\\Types\\": "src/types/",
       "Sophokles\\Graphql\\Traits\\": "src/traits/",
       "Sophokles\\Graphql\\System\\": "src/system/"
     }
