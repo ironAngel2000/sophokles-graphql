@@ -68,8 +68,9 @@ trait GraphQlHeaderTrait
             throw new \Exception('query not found');
         }
 
-        $objQuery = new $this->queries[$this->queryName]();
+        $objQuery = new $this->queries[$this->queryName]($this->headers);
         if ($objQuery instanceof QueryObjectClass) {
+            $objQuery->setHeader($this->headers);
             $objQuery->execute();
         }
 

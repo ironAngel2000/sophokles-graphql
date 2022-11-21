@@ -14,6 +14,7 @@ abstract class QueryObjectClass
     protected string $responseType;
     protected array $args = [];
     protected string $type;
+    protected array $headers = [];
 
     abstract protected function resolve(array $args = []);
 
@@ -22,13 +23,18 @@ abstract class QueryObjectClass
 
     }
 
+    public function setHeader(array $headers = [])
+    {
+        $this->headers = $headers;
+    }
+
     public function execute()
     {
         if($this->authorization() !== true) {
             user_error('Authorization failed', E_USER_ERROR);
             die();
         }
-        
+
         $config = [
             'name' => $this->name,
             'fields' => [
