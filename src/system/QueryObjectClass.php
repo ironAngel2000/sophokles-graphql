@@ -35,6 +35,7 @@ abstract class QueryObjectClass
             die();
         }
 
+
         $config = [
             'name' => $this->name,
             'fields' => [

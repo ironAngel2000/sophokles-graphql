@@ -11,6 +11,18 @@ class Types
         }
     }
 
+
+    public function __call($name, $arguments)
+    {
+        var_dump('Types - call',$name, $arguments);
+    }
+
+    public static function __callStatic($name, $arguments)
+    {
+        var_dump('Types - callStatic',$name, $arguments);
+    }
+
+
     public static function floatReturn(array $values, string $fieldName): float
     {
         if (isset($values[$fieldName])) {

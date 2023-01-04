@@ -74,6 +74,8 @@ trait GraphQlHeaderTrait
             $objQuery->execute();
         }
 
+
+
     }
 
     protected function extractQuery(string $query)

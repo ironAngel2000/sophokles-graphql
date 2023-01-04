@@ -4,22 +4,18 @@ namespace Sophokles\Graphql\Types;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use Sophokles\Database\FieldType;
 use Sophokles\Dataset\dataset;
-use Sophokles\Dataset\typeBoolean;
-use Sophokles\Dataset\typeFloat;
-use Sophokles\Dataset\typeInt;
-use Sophokles\Dataset\typeJson;
-use Sophokles\Dataset\typeText;
 
 abstract class ModelType extends ObjectType
 {
 
-    public function __construct(public $name, protected dataset $model, public $description = '')
+    public function __construct(string $typeName, protected dataset $model, public $description = '')
     {
         $fields = $this->resolveModel();
 
         $config = [
-            'name' => $this->name,
+            'name' => $typeName,
             'description' => $this->description,
             'fields' => $fields,
         ];
@@ -31,35 +27,51 @@ abstract class ModelType extends ObjectType
     {
         $fields = [];
 
-        foreach ($this->model as $item => $type) {
-            if ($type instanceof typeBoolean) {
-                $fields[$item] = [
-                    'type' => Type::boolean(),
-                ];
+        $dataModel = $this->model->getDataModel();
+
+        foreach ($dataModel as $item => $type) {
+            switch ($type) {
+                case FieldType::BIT:
+                case FieldType::INT:
+                case FieldType::BIGINT:
+                case FieldType::TIMESTAMP:
+                    $fields[$item] = [
+                        'name' => $item,
+                        'type' => Type::int(),
+                    ];
+                    break;
+                case FieldType::BOOLEAN;
+                    $fields[$item] = [
+                        'name' => $item,
+                        'type' => Type::boolean(),
+                    ];
+                    break;
+                case FieldType::DECIMAL;
+                    $fields[$item] = [
+                        'name' => $item,
+                        'type' => Type::float(),
+                    ];
+                    break;
+                default:
+                    $fields[$item] = [
+                        'name' => $item,
+                        'type' => Type::string(),
+                    ];
+                    break;
             }
-            if ($type instanceof typeInt) {
-                $fields[$item] = [
-                    'type' => Type::int(),
-                ];
-            }
-            if ($type instanceof typeText) {
-                $fields[$item] = [
-                    'type' => Type::string(),
-                ];
-            }
-            if ($type instanceof typeFloat) {
-                $fields[$item] = [
-                    'type' => Type::float(),
-                ];
-            }
-            if ($type instanceof typeJson) {
-                $fields[$item] = [
-                    'type' => Type::string(),
-                ];
-            }
+
+            $fields[$item]['resolve'] = function($rootValue, $args) use ($item) {
+                $ret = null;
+
+                if(isset($rootValue[$item])){
+                    $ret = $rootValue[$item];
+                }
+
+                return $ret;
+            };
+
         }
 
         return $fields;
     }
-
 }
